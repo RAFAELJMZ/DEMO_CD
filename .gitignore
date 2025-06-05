@@ -1,0 +1,8 @@
+apps/dashboard/__pycache__
+apps/dashboard/migrations/__pycache__
+argon/__pycache__
+conf
+photos
+app.zip
+db.sqlite3
+.env
