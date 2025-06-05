@@ -15,7 +15,6 @@ from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
-@login_required
 def dashboard(request):
     return render (request, 'dashboard.html')
 
@@ -74,35 +73,37 @@ def bitacora(request):
 
 @login_required
 def profile(request):
-    profile = Profile.objects.first()
+    # Obtener el perfil existente (si existe)
+    existing_profile = Profile.objects.filter(user=request.user).first()
     
     if request.method == 'POST':
-        profile = ProfileForm(request.POST, request.FILES)
-        if profile.is_valid():
-            new_profile = profile.save(commit=False)
-            print(request.POST, request.FILES)
-            new_profile.save()  #Guarda en la bsae de datos 
-            
-            messages.success(request, f'Se creo el perfil {new_profile.name}')
-            
-            
-            #bitacora
-            Bitacora.objects.create(
-                movimiento=f"se creo el perfil: {new_profile.name} con phone {new_profile.phone}"
-            )
-        return redirect('profile')
+        form = ProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            if existing_profile is None:  # Si no existe perfil, crearlo
+                new_profile = form.save(commit=False)
+                new_profile.user = request.user
+                new_profile.save()  # Guarda en la base de datos
+                
+                messages.success(request, f'Se creó el perfil {new_profile.name}')
+                
+                # Bitácora
+                Bitacora.objects.create(
+                    movimiento=f"Se creó el perfil: {new_profile.name} con teléfono {new_profile.phone}"
+                )
+                return redirect('profile')
+            else:
+                messages.error(request, 'Ya tienes un perfil creado')
+        else:
+            messages.error(request, 'Error en el formulario. Verifica los datos.')
     
-    else:
-        print('No se aguardaron los datos en la bd')
-        
-        context = {
-            'profile':profile
-        }
-        
-        
+    # Contexto (siempre definido, incluso después del POST)
+    context = {
+        'profile': existing_profile  # Usamos el perfil existente (puede ser None)
+    }
+    
     return render(request, 'profile.html', context)
 
-
+@login_required
 def edit_profile(request, profile_id):
     # Obtener el perfil o mostrar 404 si no existe
     profile = get_object_or_404(Profile, pk=profile_id)
@@ -135,6 +136,36 @@ def edit_profile(request, profile_id):
     }
     
     return render(request, 'edit-profile.html', context)
+
+
+
+@login_required
+def edit_user(request, profile_id):
+    profile = get_object_or_404(Profile, pk=profile_id)
+    
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            updated_profile = form.save()
+            
+            # Registro en bitácora
+            Bitacora.objects.create(
+                movimiento=f"Actualización de perfil - Usuario: {updated_profile.username}"
+            )
+            
+            messages.success(request, 'Perfil actualizado con éxito')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Error en el formulario. Verifica los datos.')
+    else:
+        form = ProfileForm(instance=profile)
+    
+    return render(request, 'edit-user.html', {
+        'form': form,
+        'profile': profile
+    })
+
+
 
 def delete_profile(request, profile_id):
     # Obtener el perfil o mostrar 404 si no existe
@@ -284,16 +315,15 @@ def sign_up(request):
             })
                
 def close(request):
-        if request.user.is_authenticated:
-            username = request.user.username
-        
+    if request.user.is_authenticated:
         Bitacora.objects.create(
-                 user=user,
-            movimiento=f"Cierra sesion: {username}"  # Corregido "existoso" a "exitoso"
+            user=request.user,
+            movimiento=f"Cierre de sesión: {request.user.username}"
         )
-        
-        logout(request)
-        return redirect('signin')            
+    
+    logout(request)
+    messages.success(request, 'Sesión cerrada correctamente')
+    return redirect('sign-in')    
 
         
                 

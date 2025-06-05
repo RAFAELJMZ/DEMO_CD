@@ -170,9 +170,9 @@
                 <li class="nav-item">
                   <a class="nav-link mb-0 px-0 py-1 active d-flex align-items-center justify-content-center " data-bs-toggle="tab" href="javascript:;" role="tab" aria-selected="true">
                     <i class="ni ni-app"></i>
-                    {% for message in messages%}
+                    {% comment %} {% for message in messages%}
                     <span class="badge bg-gradient-info">{{ message}}</span>
-                    {% endfor%}
+                    {% endfor%} {% endcomment %}
                   </a>
                 </li>
                 <li class="nav-item">
@@ -194,7 +194,17 @@
       </div>
     </div>
     <div class="container-fluid py-4">
-      <div class="row">
+      <div class="row"> 
+
+        {% for message in messages%}
+       <div class="alert alert-primary alert-dismissible fade show" role="alert">
+          <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+          <span class="alert-text"><strong>{{message}}</strong>Prueba</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+        </b>
+        {% endfor%} 
+
         <div class="col-md-8">
         <form action="{% url 'profile'%}" method="POST" class="forms-sample" enctype="multipart/form-data">
           {% csrf_token %}
@@ -297,9 +307,15 @@
             </div>
             <div class="card-header text-center border-0 pt-0 pt-lg-2 pb-4 pb-lg-3">
               <div class="d-flex justify-content-between">
-                <a href="javascript:;" class="btn btn-sm btn-info mb-0 d-none d-lg-block">Connect</a>
-                <a href="javascript:;" class="btn btn-sm btn-info mb-0 d-block d-lg-none"><i class="ni ni-collection"></i></a>
-                <a href="javascript:;" class="btn btn-sm btn-dark float-right mb-0 d-none d-lg-block">Message</a>
+
+                <a href="{% url 'edit_user' profile.id %}" 
+                  class="text-secundary font-weinght-bold text-xs" 
+                  data-toggle="tooltip" 
+                  title="Editar usuario">
+                    Editar
+                </a>
+
+               
                 <a href="javascript:;" class="btn btn-sm btn-dark float-right mb-0 d-block d-lg-none"><i class="ni ni-email-83"></i></a>
               </div>
             </div>
@@ -323,22 +339,26 @@
                 </div>
               </div>
               <div class="text-center mt-4">
+                <div>
+                  <i class="ni education_hat mr-2">{{profile.id}}</i>
+                </div>
                 <h5>
                   {{ profile.name}}<span class="font-weight-light"></span>
                 </h5>
                 <div class="h6 font-weight-300">
                   <i class="ni location_pin mr-2"></i>{{ profile.email}}
                 </div>
-                {% comment %} <div class="h6 mt-4">
-                  <i class="ni business_briefcase-24 mr-2"></i>
+                <div class="h6 mt-4">
+                  <i class="ni business_briefcase-24 mr-2">{{profile.phone}}</i>
                 </div>
                 <div>
-                  <i class="ni education_hat mr-2"></i>
-                </div> {% endcomment %}
+                  <i class="ni education_hat mr-2">{{profile.username}}</i>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
       <footer class="footer pt-3  ">
         <div class="container-fluid">
