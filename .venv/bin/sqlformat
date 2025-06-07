@@ -1,4 +1,4 @@
-#!/home/vboxuser/Documentos/corvus_data/Programas/.venv/bin/python3
+#!/home/rafael/Documentos/corvus_data/Programas/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
