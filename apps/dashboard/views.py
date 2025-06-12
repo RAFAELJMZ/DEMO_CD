@@ -14,23 +14,20 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 
 
-# Create your views here.
 def dashboard(request):
     return render (request, 'dashboard.html')
 
 @login_required
 def bitacora(request):
-    # Initialize variables with default values
     profiles = None
     bitacoras = None
     search_query = request.GET.get('filter', '')
-    search_bitacora = request.GET.get('filter', '')  # Same filter for both or separate if needed
+    search_bitacora = request.GET.get('filter', '')  
     
-    # Initialize querysets
     profile_list = Profile.objects.all().order_by('name')
     bitacora_list = Bitacora.objects.all().order_by('-fecha')
     
-    # Profile filtering
+    # Profile 
     if search_query:
         profile_list = profile_list.filter(
             Q(name__icontains=search_query) |
@@ -41,18 +38,15 @@ def bitacora(request):
         page_number = request.GET.get('page')
         profiles = paginator.get_page(page_number)
     
-    # Bitacora filtering
+    # Bitacora 
     if search_bitacora:
         bitacora_list = bitacora_list.filter(
-            # Add your Bitacora model filter conditions here
-            # Example: Q(action__icontains=search_bitacora) | Q(user__name__icontains=search_bitacora)
         )
         
         paginator = Paginator(bitacora_list, 5)
         page_number = request.GET.get('page')
         bitacoras = paginator.get_page(page_number)
     
-    # If no search was performed, show all results
     if not search_query and not search_bitacora:
         paginator = Paginator(profile_list, 5)
         page_number = request.GET.get('page')
